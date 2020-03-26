@@ -51,7 +51,7 @@ def ml_loop():
         if not ball_served:
             comm.send_instruction(scene_info.frame, PlatformAction.SERVE_TO_LEFT)
             ball_served = True
-        else:
+        '''else:
             dir_x=scene_info.ball[0]-ball_x
             dir_y=scene_info.ball[1]-ball_y
             ball_x=scene_info.ball[0]
@@ -76,4 +76,4 @@ def ml_loop():
                 elif scene_info.ball[0]>scene_info.platform[0]:
                     comm.send_instruction(scene_info.frame, PlatformAction.MOVE_RIGHT) 
                 else:
-                    comm.send_instruction(scene_info.frame, PlatformAction.NONE) 
+                    comm.send_instruction(scene_info.frame, PlatformAction.NONE) '''
