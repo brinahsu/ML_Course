@@ -73,12 +73,12 @@ def ml_loop():
                 else:
                     comm.send_instruction(scene_info.frame, PlatformAction.NONE) 
             else:             
-                "if 180<scene_info.platform[0]:
+                #if 180<scene_info.platform[0]:
                     comm.send_instruction(scene_info.frame, PlatformAction.MOVE_LEFT)
-                "elif 180>scene_info.platform[0]:
-                 "   comm.send_instruction(scene_info.frame, PlatformAction.MOVE_RIGHT) 
-                "else:
-                 "   comm.send_instruction(scene_info.frame, PlatformAction.NONE) 
+                #elif 180>scene_info.platform[0]:
+                 #   comm.send_instruction(scene_info.frame, PlatformAction.MOVE_RIGHT) 
+                #else:
+                 #   comm.send_instruction(scene_info.frame, PlatformAction.NONE) 
                 '''if scene_info.ball[0]<scene_info.platform[0]:
                     comm.send_instruction(scene_info.frame, PlatformAction.MOVE_LEFT)
                 elif scene_info.ball[0]>scene_info.platform[0]:
