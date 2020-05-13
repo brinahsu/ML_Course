@@ -82,7 +82,7 @@ def ml_loop(side: str):
             if(pt1<=scene_info["blocker"][0]+block_direction*f1+30 and pt1>=scene_info["blocker"][0]+block_direction*f1):
                 #print("yes")
                 pred=pt1+(scene_info["ball_speed"][0]*f1)
-            return move_to(player = '1P',pred = pred,f=10)
+            return move_to(player = '1P',pred = pred,f=3)
 
 
 
