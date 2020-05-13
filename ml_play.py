@@ -41,7 +41,7 @@ def ml_loop(side: str):
             elif scene_info["platform_2P"][0]+20 <= (pred-10) : return 1 # goes right
             else : return 2 # goes left
 
-    def ml_loop_for_1P(block_direction): 
+    def ml_loop_for_1P(): 
         #print(scene_info["blocker"][0])
         if scene_info["ball_speed"][1] > 0 : # 球正在向下 # ball goes down
             x = ( scene_info["platform_1P"][1]-scene_info["ball"][1] ) // scene_info["ball_speed"][1] # 幾個frame以後會需要接  # x means how many frames before catch the ball
@@ -59,29 +59,6 @@ def ml_loop(side: str):
                     pred = pred + (abs(bound)*200)
             return move_to(player = '1P',pred = pred,f=x)
         else : # 球正在向上 # ball goes up
-            t=1
-            pred=100
-            f1=(scene_info["blocker"][1]-scene_info["ball"][1])//scene_info["ball_speed"][1]#球再f1個frame到板子
-            pt1=scene_info["ball"][0]+(scene_info["ball_speed"][0]*f1)#預測球到板子位置的x值
-            pt2=scene_info["ball"][1]+(scene_info["ball_speed"][1]*f1)#預測球到板子位置的y值
-            bound = pt1 // 200 # Determine if it is beyond the boundary
-            if (bound > 0): # pred > 200 # fix landing position
-                if (bound%2 == 0) : 
-                    pt1 = pt1 - bound*200                    
-                else :
-                    pt1 = 200 - (pt1 - 200*bound)
-            elif (bound < 0) : # pred < 0
-                if (bound%2 ==1) :
-                    pt1 = abs(pt1 - (bound+1) *200)
-                else :
-                    pt1 = pt1 + (abs(bound)*200)
-            #print("pt1")        
-            #print(pt1)
-            #print(scene_info["blocker"][0]+block_direction*f1)
-
-            if(pt1<=scene_info["blocker"][0]+block_direction*f1+30 and pt1>=scene_info["blocker"][0]+block_direction*f1):
-                #print("yes")
-                pred=pt1+(scene_info["ball_speed"][0]*f1)
             return move_to(player = '1P',pred = pred,f=3)
 
 
@@ -135,10 +112,7 @@ def ml_loop(side: str):
             ball_served = True
         else:
             if side == "1P":
-                block_direction=scene_info["blocker"][0]-block_pre
-                block_pre=scene_info["blocker"][0]
-                #print(block_direction)
-                command = ml_loop_for_1P(block_direction)
+                command = ml_loop_for_1P()
             else:
                 command = ml_loop_for_2P()
 
