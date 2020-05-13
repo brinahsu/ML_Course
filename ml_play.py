@@ -26,9 +26,9 @@ def ml_loop(side: str):
     def move_to(player, pred,f) : #move platform to predicted position to catch ball 
         if player == '1P':
             if(f<2):
-                if(scene_info["ball_speed"][0]>0):
+                if(scene_info["ball"][0]>0):
                     return 1
-                elif(scene_info["ball_speed"][0]<0):
+                elif(scene_info["ball"][0]<0):
                     return 2
                 else:
                     return 0
@@ -59,7 +59,7 @@ def ml_loop(side: str):
                     pred = pred + (abs(bound)*200)
             return move_to(player = '1P',pred = pred,f=x)
         else : # 球正在向上 # ball goes up
-            return move_to(player = '1P',pred = pred,f=3)
+            return move_to(player = '1P',pred = 100,f=3)
 
 
 
