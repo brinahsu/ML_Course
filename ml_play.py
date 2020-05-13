@@ -42,7 +42,7 @@ def ml_loop(side: str):
         #print(scene_info["blocker"][0])
         if scene_info["ball_speed"][1] > 0 : # 球正在向下 # ball goes down
             f1=(scene_info["blocker"][1]+20-scene_info["ball"][1])//scene_info["ball_speed"][1]#球再f1個frame到板子
-            pt2=scene_info["ball"][1]+(scene_info["ball_speed"][1]*f1)
+            pt1=scene_info["ball"][0]+(scene_info["ball_speed"][0]*f1)#預測球到板子位置的x值
             
             x = ( scene_info["platform_1P"][1]-scene_info["ball"][1] ) // scene_info["ball_speed"][1] # 幾個frame以後會需要接  # x means how many frames before catch the ball
             pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x)  # 預測最終位置 # pred means predict ball landing site 
