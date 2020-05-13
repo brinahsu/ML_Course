@@ -22,6 +22,7 @@ def ml_loop(side: str):
     # === Here is the execution order of the loop === #
     # 1. Put the initialization code here
     ball_served = False
+    block_pre=85
     def move_to(player, pred,f) : #move platform to predicted position to catch ball 
         if player == '1P':
             if(f<2):
@@ -37,8 +38,8 @@ def ml_loop(side: str):
             elif scene_info["platform_2P"][0]+20 <= (pred-10) : return 1 # goes right
             else : return 2 # goes left
 
-    def ml_loop_for_1P(): 
-        print(scene_info["blocker"][0])
+    def ml_loop_for_1P(block_direction): 
+        #print(scene_info["blocker"][0])
         if scene_info["ball_speed"][1] > 0 : # 球正在向下 # ball goes down
             x = ( scene_info["platform_1P"][1]-scene_info["ball"][1] ) // scene_info["ball_speed"][1] # 幾個frame以後會需要接  # x means how many frames before catch the ball
             pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x)  # 預測最終位置 # pred means predict ball landing site 
@@ -57,7 +58,7 @@ def ml_loop(side: str):
         else : # 球正在向上 # ball goes up
             t=1
             pred=100
-            f1=scene_info["blocker"][1]-scene_info["ball"][1]//scene_info["ball_speed"][1]#球再f1個frame到板子
+            f1=(scene_info["blocker"][1]+20-scene_info["ball"][1])//scene_info["ball_speed"][1]#球再f1個frame到板子
             pt1=scene_info["ball"][0]+(scene_info["ball_speed"][0]*f1)#預測球到板子位置的x值
             bound = pt1 // 200 # Determine if it is beyond the boundary
             if (bound > 0): # pred > 200 # fix landing position
@@ -70,12 +71,14 @@ def ml_loop(side: str):
                     pt1 = abs(pt1 - (bound+1) *200)
                 else :
                     pt1 = pt1 + (abs(bound)*200)
-            block_direction=scene_info["blocker"][0]-block_pre
-            block_pre=scene_info["blocker"][0]
-
-            if(pt1<scene_info["blocker"][0]+block_direction*f1+30&pt1>scene_info["blocker"][0]+block_direction*f1):
+            print("pt1")        
+            print(pt1)
+            print(scene_info["blocker"][0]+block_direction*f1)
+            if(pt1<scene_info["blocker"][0]+block_direction*f1+30 and pt1>scene_info["blocker"][0]+block_direction*f1):
+                print("yes")
                 pred=pt1+(scene_info["ball_speed"][0]*f1)
             return move_to(player = '1P',pred = pred,f=10)
+
 
 
 
@@ -127,7 +130,10 @@ def ml_loop(side: str):
             ball_served = True
         else:
             if side == "1P":
-                command = ml_loop_for_1P()
+                block_direction=scene_info["blocker"][0]-block_pre
+                block_pre=scene_info["blocker"][0]
+                #print(block_direction)
+                command = ml_loop_for_1P(block_direction)
             else:
                 command = ml_loop_for_2P()
 
