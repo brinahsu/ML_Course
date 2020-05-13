@@ -57,6 +57,17 @@ def ml_loop(side: str):
                     pred = abs(pred - (bound+1) *200)
                 else :
                     pred = pred + (abs(bound)*200)
+            bound = pt1 // 200 # Determine if it is beyond the boundary
+            if (bound > 0): # pred > 200 # fix landing position
+                if (bound%2 == 0) : 
+                    pt1 = pt1 - bound*200                    
+                else :
+                    pt1 = 200 - (pt1 - 200*bound)
+            elif (bound < 0) : # pred < 0
+                if (bound%2 ==1) :
+                    pt1 = abs(pt1 - (bound+1) *200)
+                else :
+                    pt1 = pt1 + (abs(bound)*200)
             if(pt1<=scene_info["blocker"][0]+block_direction*f1+30 and pt1>=scene_info["blocker"][0]+block_direction*f1):
                 print("yes")
                 pred=pt1+(scene_info["ball_speed"][0]*f1)
