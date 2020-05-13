@@ -30,8 +30,8 @@ def ml_loop(side: str):
                     return 1
                 else :return 2
             else:
-                if scene_info["platform_1P"][0]+20  > (pred-10) and scene_info["platform_1P"][0]+20 < (pred+10): return 0 # NONE
-                elif scene_info["platform_1P"][0]+20 <= (pred-10) : return 1 # goes right
+                if scene_info["platform_1P"][0]+40  > pred and scene_info["platform_1P"][0] < pred+10: return 0 # NONE
+                elif scene_info["platform_1P"][0]+40 <=pred : return 1 # goes right
                 else : return 2 # goes left
         else :
             if scene_info["platform_2P"][0]+20  > (pred-10) and scene_info["platform_2P"][0]+20 < (pred+10): return 0 # NONE
