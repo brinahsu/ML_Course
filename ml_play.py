@@ -1,87 +1,176 @@
 """
-The template of the main script of the machine learning process
+The template of the script for the machine learning process in game pingpong
 """
 
-import games.arkanoid.communication as comm
-from games.arkanoid.communication import ( \
-    SceneInfo, GameStatus, PlatformAction
-)
+# Import the necessary modules and classes
+from mlgame.communication import ml as comm
 
-def ml_loop():
+def ml_loop(side: str):
     """
-    The main loop of the machine learning process
-
-    This loop is run in a separate process, and communicates with the game process.
-
-    Note that the game process won't wait for the ml process to generate the
-    GameInstruction. It is possible that the frame of the GameInstruction
-    is behind of the current frame in the game process. Try to decrease the fps
-    to avoid this situation.
+    The main loop for the machine learning process
+    The `side` parameter can be used for switch the code for either of both sides,
+    so you can write the code for both sides in the same script. Such as:
+    ```python
+    if side == "1P":
+        ml_loop_for_1P()
+    else:
+        ml_loop_for_2P()
+    ```
+    @param side The side which this script is executed for. Either "1P" or "2P".
     """
 
     # === Here is the execution order of the loop === #
-    # 1. Put the initialization code here.
+    # 1. Put the initialization code here
     ball_served = False
-    ball_x=100
-    ball_y=400
-    dir_x=0
-    # 2. Inform the game process that ml process is ready before start the loop.
+    block_pre=85
+    def move_to(player, pred,f) : #move platform to predicted position to catch ball 
+        if player == '1P':
+            if(f<2):
+                if(scene_info["ball_speed"][0]>0):
+                    return 1
+                else :return 2
+            else:
+                if scene_info["platform_1P"][0]+20  > (pred-10) and scene_info["platform_1P"][0]+20 < (pred+10): return 0 # NONE
+                elif scene_info["platform_1P"][0]+20 <= (pred-10) : return 1 # goes right
+                else : return 2 # goes left
+        else :
+            if scene_info["platform_2P"][0]+20  > (pred-10) and scene_info["platform_2P"][0]+20 < (pred+10): return 0 # NONE
+            elif scene_info["platform_2P"][0]+20 <= (pred-10) : return 1 # goes right
+            else : return 2 # goes left
+
+    def ml_loop_for_1P(block_direction): 
+        #print(scene_info["blocker"][0])
+        if scene_info["ball_speed"][1] > 0 : # 球正在向下 # ball goes down
+            f1=(scene_info["blocker"][1]+20-scene_info["ball"][1])//scene_info["ball_speed"][1]#球再f1個frame到板子
+            pt1=scene_info["ball"][0]+(scene_info["ball_speed"][0]*f1)#預測球到板子位置的x值
+            pt2=scene_info["ball"][1]+(scene_info["ball_speed"][1]*f1)#預測球到板子位置的y值
+            x = ( scene_info["platform_1P"][1]-scene_info["ball"][1] ) // scene_info["ball_speed"][1] # 幾個frame以後會需要接  # x means how many frames before catch the ball
+            pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x)  # 預測最終位置 # pred means predict ball landing site 
+            bound = pred // 200 # Determine if it is beyond the boundary
+            if (bound > 0): # pred > 200 # fix landing position
+                if (bound%2 == 0) : 
+                    pred = pred - bound*200                    
+                else :
+                    pred = 200 - (pred - 200*bound)
+            elif (bound < 0) : # pred < 0
+                if (bound%2 ==1) :
+                    pred = abs(pred - (bound+1) *200)
+                else :
+                    pred = pred + (abs(bound)*200)
+            bound = pt1 // 200 # Determine if it is beyond the boundary
+            if (bound > 0): # pred > 200 # fix landing position
+                if (bound%2 == 0) : 
+                    pt1 = pt1 - bound*200                    
+                else :
+                    pt1 = 200 - (pt1 - 200*bound)
+            elif (bound < 0) : # pred < 0
+                if (bound%2 ==1) :
+                    pt1 = abs(pt1 - (bound+1) *200)
+                else :
+                    pt1 = pt1 + (abs(bound)*200)
+            if(pt1<=scene_info["blocker"][0]+block_direction*f1+30 and pt1>=scene_info["blocker"][0]+block_direction*f1):
+                print("yes")
+                pred=pt1+((-1)*scene_info["ball_speed"][0]*((420-pt2)//scene_info["ball_speed"][1]))
+                bound = pred // 200 # Determine if it is beyond the boundary
+                if (bound > 0): # pred > 200 # fix landing position
+                    if (bound%2 == 0) : 
+                        pred = pred - bound*200                    
+                    else :
+                        pred = 200 - (pred - 200*bound)
+                elif (bound < 0) : # pred < 0
+                    if (bound%2 ==1) :
+                        pred = abs(pred - (bound+1) *200)
+                    else :
+                        pred = pred + (abs(bound)*200)
+
+            return move_to(player = '1P',pred = pred,f=x)
+        else : # 球正在向上 # ball goes up
+            t=1
+            pred=100
+            f1=(scene_info["blocker"][1]-scene_info["ball"][1])//scene_info["ball_speed"][1]#球再f1個frame到板子
+            pt1=scene_info["ball"][0]+(scene_info["ball_speed"][0]*f1)#預測球到板子位置的x值
+            pt2=scene_info["ball"][1]+(scene_info["ball_speed"][1]*f1)#預測球到板子位置的y值
+            bound = pt1 // 200 # Determine if it is beyond the boundary
+            if (bound > 0): # pred > 200 # fix landing position
+                if (bound%2 == 0) : 
+                    pt1 = pt1 - bound*200                    
+                else :
+                    pt1 = 200 - (pt1 - 200*bound)
+            elif (bound < 0) : # pred < 0
+                if (bound%2 ==1) :
+                    pt1 = abs(pt1 - (bound+1) *200)
+                else :
+                    pt1 = pt1 + (abs(bound)*200)
+            print("pt1")        
+            print(pt1)
+            print(scene_info["blocker"][0]+block_direction*f1)
+
+            if(pt1<=scene_info["blocker"][0]+block_direction*f1+30 and pt1>=scene_info["blocker"][0]+block_direction*f1):
+                print("yes")
+                pred=pt1+(scene_info["ball_speed"][0]*f1)
+            return move_to(player = '1P',pred = pred,f=10)
+
+
+
+
+    def ml_loop_for_2P():  # as same as 1P
+        if scene_info["ball_speed"][1] > 0 : 
+            return move_to(player = '2P',pred = 100,f=10)
+        else : 
+            x = ( scene_info["platform_2P"][1]+30-scene_info["ball"][1] ) // scene_info["ball_speed"][1] 
+            #print(x)
+            pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x) 
+            bound = pred // 200 
+            if (bound > 0):
+                if (bound%2 == 0):
+                    pred = pred - bound*200 
+                else :
+                    pred = 200 - (pred - 200*bound)
+            elif (bound < 0) :
+                if bound%2 ==1:
+                    pred = abs(pred - (bound+1) *200)
+                else :
+                    pred = pred + (abs(bound)*200)
+            return move_to(player = '2P',pred = pred,f=x)
+
+    # 2. Inform the game process that ml process is ready
     comm.ml_ready()
 
-    # 3. Start an endless loop.
+    # 3. Start an endless loop
     while True:
-        # 3.1. Receive the scene information sent from the game process.
-        scene_info = comm.get_scene_info()
+        # 3.1. Receive the scene information sent from the game process
+        scene_info = comm.recv_from_game()
 
-        # 3.2. If the game is over or passed, the game process will reset
-        #      the scene and wait for ml process doing resetting job.
-        if scene_info.status == GameStatus.GAME_OVER or \
-            scene_info.status == GameStatus.GAME_PASS:
-            # Do some stuff if needed
+        # 3.2. If either of two sides wins the game, do the updating or
+        #      resetting stuff and inform the game process when the ml process
+        #      is ready.
+        if scene_info["status"] != "GAME_ALIVE":
+            # Do some updating or resetting stuff
             ball_served = False
 
-            # 3.2.1. Inform the game process that ml process is ready
+            # 3.2.1 Inform the game process that
+            #       the ml process is ready for the next round
             comm.ml_ready()
             continue
 
-        # 3.3. Put the code here to handle the scene information
-        
+        # 3.3 Put the code here to handle the scene information
 
-
-        # 3.4. Send the instruction for this frame to the game process
+        # 3.4 Send the instruction for this frame to the game process
         if not ball_served:
-            comm.send_instruction(scene_info.frame, PlatformAction.SERVE_TO_LEFT)
+            comm.send_to_game({"frame": scene_info["frame"], "command": "SERVE_TO_LEFT"})
             ball_served = True
         else:
-            if dir_x*(scene_info.ball[0]-ball_x)<0:
-                dir_x=-dir_x
+            if side == "1P":
+                block_direction=scene_info["blocker"][0]-block_pre
+                block_pre=scene_info["blocker"][0]
+                #print(block_direction)
+                command = ml_loop_for_1P(block_direction)
             else:
-                dir_x=scene_info.ball[0]-ball_x
-            dir_y=scene_info.ball[1]-ball_y
-            ball_x=scene_info.ball[0]
-            ball_y=scene_info.ball[1]
-            if dir_y>0:
-                pla_x=(400-scene_info.ball[1])*(dir_x/dir_y)+scene_info.ball[0]
-                if pla_x>200:
-                    pla_x=200-(pla_x-200)
-                if pla_x<0:
-                    pla_x=0-pla_x    
-                if pla_x>scene_info.platform[0]+40:                   
-                    comm.send_instruction(scene_info.frame, PlatformAction.MOVE_RIGHT)
-                elif pla_x<scene_info.platform[0]:
-                    comm.send_instruction(scene_info.frame, PlatformAction.MOVE_LEFT)
-                else:
-                    comm.send_instruction(scene_info.frame, PlatformAction.NONE) 
-            else:             
-                if 80<scene_info.platform[0]:
-                    comm.send_instruction(scene_info.frame, PlatformAction.MOVE_LEFT)
-                elif 80>scene_info.platform[0]:
-                    comm.send_instruction(scene_info.frame, PlatformAction.MOVE_RIGHT) 
-                else:
-                   comm.send_instruction(scene_info.frame, PlatformAction.NONE) 
-                '''if scene_info.ball[0]<scene_info.platform[0]:
-                    comm.send_instruction(scene_info.frame, PlatformAction.MOVE_LEFT)
-                elif scene_info.ball[0]>scene_info.platform[0]:
-                    comm.send_instruction(scene_info.frame, PlatformAction.MOVE_RIGHT) 
-                else:
-                    comm.send_instruction(scene_info.frame, PlatformAction.NONE) '''
+                command = ml_loop_for_2P()
+
+            if command == 0:
+                comm.send_to_game({"frame": scene_info["frame"], "command": "NONE"})
+            elif command == 1:
+                comm.send_to_game({"frame": scene_info["frame"], "command": "MOVE_RIGHT"})
+            else :
+                comm.send_to_game({"frame": scene_info["frame"], "command": "MOVE_LEFT"})
