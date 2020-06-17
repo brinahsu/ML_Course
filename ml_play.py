@@ -117,7 +117,7 @@ class MLPlay:
                         if (1 not in grid) and (4 not in grid)and (self.last!=2): # turn left 
                             self.last=1
                             if car_ypos[5]<100:
-                                if car_ypos[5]<90
+                                if car_ypos[5]<90:
                                     return ["BRAKE","MOVE_LEFT"]
                                 else:
                                     return ["NONE","MOVE_LEFT"]
@@ -126,7 +126,7 @@ class MLPlay:
                         elif (3 not in grid) and (6 not in grid) and (self.last!=1): # turn right
                             self.last=2
                             if car_ypos[5]<100:
-                                if car_ypos[5]<90
+                                if car_ypos[5]<90:
                                     return ["BRAKE","MOVE_RIGHT"]
                                 else:
                                     return ["NONE","MOVE_RIGHT"]
