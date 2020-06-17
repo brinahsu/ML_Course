@@ -96,6 +96,7 @@ class MLPlay:
             else:
                 if (2 not in grid) or ((1 in grid) and (3 in grid) and (4 in grid) and (6 in grid)): # Check forward 
                     # Back to lane center
+                    self.brake=0
                     if self.car_pos[0] > self.lanes[self.car_lane]:
                         return ["SPEED", "MOVE_LEFT"]
                     elif self.car_pos[0 ] < self.lanes[self.car_lane]:
@@ -178,24 +179,31 @@ class MLPlay:
                         if(car_id[6]<=4) and (car_id[6]!=0) :'''
 
                     if (self.car_pos[0] < 60 ):
+                        self.brake=0
                         return ["SPEED", "MOVE_RIGHT"]
                     if (1 not in grid) and (4 not in grid) and (7 not in grid)and (self.last!=2): # turn left 
                         self.last=1
+                        self.brake=0
                         return ["SPEED", "MOVE_LEFT"]
                     if (3 not in grid) and (6 not in grid) and (9 not in grid)and (self.last!=1): # turn right
                         self.last=2
+                        self.brake=0
                         return ["SPEED", "MOVE_RIGHT"]
                     if (1 not in grid) and (4 not in grid): # turn left 
                         self.last=1
+                        self.brake=0
                         return ["SPEED", "MOVE_LEFT"]
                     if (3 not in grid) and (6 not in grid): # turn right
                         self.last=2
+                        self.brake=0
                         return ["SPEED", "MOVE_RIGHT"]
                     if (4 not in grid) and (7 not in grid) and(car_ypos[1]>=100): # turn left 
                         self.last=1
+                        self.brake=0
                         return ["MOVE_LEFT","SPEED"]    
                     if (6 not in grid) and (9 not in grid) and(car_ypos[3]>=100): # turn right
                         self.last=2
+                        self.brake=0
                         return ["MOVE_RIGHT","SPEED"]
                                 
                     
