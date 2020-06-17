@@ -14,6 +14,7 @@ class MLPlay:
         self.car_lane = self.car_pos[0] // 70       # lanes 0 ~ 8
         self.lanes = [35, 105, 175, 245, 315, 385, 455, 525, 595]  # lanes center
         self.last=0
+        self.brake=0
         pass
 
     def update(self, scene_info):
@@ -116,43 +117,57 @@ class MLPlay:
                                 return ["BRAKE", "MOVE_RIGHT"]'''
                         if (1 not in grid) and (4 not in grid)and (self.last!=2): # turn left 
                             self.last=1
-                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead):
+                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead)and self.brake==0:
+                                self.brake=1
                                 return ["BRAKE","MOVE_LEFT"]
                             elif speed_ahead!=0 and car_ypos[5]<(1600/speed_ahead):
+                                self.brake=0
                                 return ["NONE","MOVE_LEFT"]
                             else:
+                                self.brake=0
                                 return ["SPEED", "MOVE_LEFT"]
                         elif (3 not in grid) and (6 not in grid) and (self.last!=1): # turn right
                             self.last=2
-                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead):
+                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead) and self.brake==0:
+                                self.brake=1
                                 return ["BRAKE","MOVE_RIGHT"]
                             elif speed_ahead!=0 and car_ypos[5]<(1600/speed_ahead):
+                                self.brake=0
                                 return ["NONE","MOVE_RIGHT"]
                             else:
+                                self.brake=0
                                 return ["SPEED", "MOVE_RIGHT"]
                         if (1 in grid) and (4 not in grid) and (car_ypos[1]>car_ypos[5]):
                             '''if (3 in grid) and (6 not in grid) and (car_ypos[3]>car_ypos[1]):
                                 return ["SPEED", "MOVE_RIGHT"]
                             else:'''
                             self.last=1
-                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead):
+                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead) and self.brake==0:
+                                self.brake=1
                                 return ["BRAKE","MOVE_LEFT"]
                             elif speed_ahead!=0 and car_ypos[5]<(1600/speed_ahead):
+                                self.brake=0
                                 return ["NONE","MOVE_LEFT"]
                             else:
+                                self.brake=0
                                 return ["SPEED", "MOVE_LEFT"]
                         elif (3 in grid) and (6 not in grid) and (car_ypos[3]>car_ypos[5]):
                             self.last=2
-                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead):
+                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead) and self.brake==0:
+                                self.brake=1
                                 return ["BRAKE","MOVE_RIGHT"]
                             elif speed_ahead!=0 and car_ypos[5]<(1600/speed_ahead):
+                                self.brake=0
                                 return ["NONE","MOVE_RIGHT"]
                             else:
+                                self.brake=0
                                 return ["SPEED", "MOVE_RIGHT"]
                         elif (1 in grid) and (3 in grid) and (car_ypos[1]<=car_ypos[5])and (car_ypos[3]<=car_ypos[5]):
-                            if car_ypos[5]<100:
+                            if car_ypos[5]<100 and self.brake==0:
+                                self.brake=1
                                 return ["BRAKE"]
                             else:
+                                self.brake=0
                                 return ["NONE"]
                         if(4 in grid) and (6 in grid) : 
                             if self.car_vel < speed_ahead:  # BRAKE
