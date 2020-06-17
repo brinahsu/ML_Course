@@ -154,7 +154,7 @@ class MLPlay:
                         self.last=1
                         return ["SPEED", "MOVE_LEFT"]
                     if (3 not in grid) and (6 not in grid) and (9 not in grid)and (self.last!=1): # turn right
-                        self,last=2
+                        self.last=2
                         return ["SPEED", "MOVE_RIGHT"]
                     if (1 not in grid) and (4 not in grid): # turn left 
                         self.last=1
