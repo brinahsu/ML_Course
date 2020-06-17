@@ -1,176 +1,184 @@
-"""
-The template of the script for the machine learning process in game pingpong
-"""
+class MLPlay:
+    def __init__(self, player):
+        self.player = player
+        if self.player == "player1":
+            self.player_no = 0
+        elif self.player == "player2":
+            self.player_no = 1
+        elif self.player == "player3":
+            self.player_no = 2
+        elif self.player == "player4":
+            self.player_no = 3
+        self.car_vel = 0                            # speed initial
+        self.car_pos = (0,0)                        # pos initial
+        self.car_lane = self.car_pos[0] // 70       # lanes 0 ~ 8
+        self.lanes = [35, 105, 175, 245, 315, 385, 455, 525, 595]  # lanes center
+        self.last=0
+        pass
 
-# Import the necessary modules and classes
-from mlgame.communication import ml as comm
+    def update(self, scene_info):
+        """
+        9 grid relative position
+        |    |    |    |
+        |  1 |  2 |  3 |
+        |    |  5 |    |
+        |  4 |  c |  6 |
+        |    |    |    |
+        |  7 |  8 |  9 |
+        |    |    |    |       
+        """
+        car_ypos=[0,0,0,0,0,0,0,0,0,0]
+        car_id=[0,0,0,0,0,0,0,0,0,0]
+        def check_grid():
+            grid = set()
+            speed_ahead = 100
+            if self.car_pos[0] < 65: # left bound
+                grid.add(1)
+                grid.add(4)
+                grid.add(7)
+            elif self.car_pos[0] > 565: # right bound
+                grid.add(3)
+                grid.add(6)
+                grid.add(9)
 
-def ml_loop(side: str):
-    """
-    The main loop for the machine learning process
-    The `side` parameter can be used for switch the code for either of both sides,
-    so you can write the code for both sides in the same script. Such as:
-    ```python
-    if side == "1P":
-        ml_loop_for_1P()
-    else:
-        ml_loop_for_2P()
-    ```
-    @param side The side which this script is executed for. Either "1P" or "2P".
-    """
-
-    # === Here is the execution order of the loop === #
-    # 1. Put the initialization code here
-    ball_served = False
-    block_pre=85
-    def move_to(player, pred,f) : #move platform to predicted position to catch ball 
-        if player == '1P':
-            if(f<2):
-                if(scene_info["ball_speed"][0]>0):
-                    return 1
-                else :return 2
+            for car in scene_info["cars_info"]:
+                if car["id"] != self.player_no:
+                    x = self.car_pos[0] - car["pos"][0] # x relative position
+                    y = self.car_pos[1] - car["pos"][1] # y relative position
+                    if x <= 40 and x >= -40 :     #同一道 
+                        if y > 0 and y < 300:     #正前方
+                            grid.add(2)
+                            car_ypos[2]=y
+                            car_id[2]=car["id"]
+                            if y < 200:
+                                speed_ahead = car["velocity"]
+                                grid.add(5)
+                                car_ypos[5]=y
+                                car_id[5]=car["id"]
+                        elif y < 0 and y > -200: #正後方
+                            grid.add(8)
+                            car_ypos[8]=y
+                            car_id[8]=car["id"]
+                    if x > -100 and x < -40 :
+                        if y > 80 and y < 250: #右前方
+                            grid.add(3)
+                            car_ypos[3]=y
+                            car_id[3]=car["id"]
+                        elif y < -80 and y > -200: #右後方
+                            grid.add(9)
+                            car_ypos[9]=y
+                            car_id[9]=car["id"]
+                        elif y < 80 and y > -80: #右邊
+                            grid.add(6)
+                            car_ypos[6]=y
+                            car_id[6]=car["id"]
+                    if x < 100 and x > 40:
+                        if y > 80 and y < 250: #左前方
+                            grid.add(1)
+                            car_ypos[1]=y
+                            car_id[1]=car["id"]
+                        elif y < -80 and y > -200: #左後方
+                            grid.add(7)
+                            car_ypos[7]=y
+                            car_id[7]=car["id"]
+                        elif y < 80 and y > -80: #左方
+                            grid.add(4)
+                            car_ypos[4]=y
+                            car_id[4]=car["id"]
+            return move(grid= grid, speed_ahead = speed_ahead)
+            
+        def move(grid, speed_ahead): 
+            if self.player_no == 0:
+                print(grid)
+            if len(grid) == 0:
+                return ["SPEED"]
             else:
-                if scene_info["platform_1P"][0]+20  > (pred-10) and scene_info["platform_1P"][0]+20 < (pred+10): return 0 # NONE
-                elif scene_info["platform_1P"][0]+20 <= (pred-10) : return 1 # goes right
-                else : return 2 # goes left
-        else :
-            if scene_info["platform_2P"][0]+20  > (pred-10) and scene_info["platform_2P"][0]+20 < (pred+10): return 0 # NONE
-            elif scene_info["platform_2P"][0]+20 <= (pred-10) : return 1 # goes right
-            else : return 2 # goes left
-
-    def ml_loop_for_1P(block_direction): 
-        #print(scene_info["blocker"][0])
-        if scene_info["ball_speed"][1] > 0 : # 球正在向下 # ball goes down
-            f1=(scene_info["blocker"][1]+20-scene_info["ball"][1])//scene_info["ball_speed"][1]#球再f1個frame到板子
-            pt1=scene_info["ball"][0]+(scene_info["ball_speed"][0]*f1)#預測球到板子位置的x值
-            pt2=scene_info["ball"][1]+(scene_info["ball_speed"][1]*f1)#預測球到板子位置的y值
-            x = ( scene_info["platform_1P"][1]-scene_info["ball"][1] ) // scene_info["ball_speed"][1] # 幾個frame以後會需要接  # x means how many frames before catch the ball
-            pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x)  # 預測最終位置 # pred means predict ball landing site 
-            bound = pred // 200 # Determine if it is beyond the boundary
-            if (bound > 0): # pred > 200 # fix landing position
-                if (bound%2 == 0) : 
-                    pred = pred - bound*200                    
-                else :
-                    pred = 200 - (pred - 200*bound)
-            elif (bound < 0) : # pred < 0
-                if (bound%2 ==1) :
-                    pred = abs(pred - (bound+1) *200)
-                else :
-                    pred = pred + (abs(bound)*200)
-            bound = pt1 // 200 # Determine if it is beyond the boundary
-            if (bound > 0): # pred > 200 # fix landing position
-                if (bound%2 == 0) : 
-                    pt1 = pt1 - bound*200                    
-                else :
-                    pt1 = 200 - (pt1 - 200*bound)
-            elif (bound < 0) : # pred < 0
-                if (bound%2 ==1) :
-                    pt1 = abs(pt1 - (bound+1) *200)
-                else :
-                    pt1 = pt1 + (abs(bound)*200)
-            if(pt1<=scene_info["blocker"][0]+block_direction*f1+30 and pt1>=scene_info["blocker"][0]+block_direction*f1):
-                print("yes")
-                pred=pt1+((-1)*scene_info["ball_speed"][0]*((420-pt2)//scene_info["ball_speed"][1]))
-                bound = pred // 200 # Determine if it is beyond the boundary
-                if (bound > 0): # pred > 200 # fix landing position
-                    if (bound%2 == 0) : 
-                        pred = pred - bound*200                    
+                if (2 not in grid) or ((1 in grid) and (3 in grid) and (4 in grid) and (6 in grid)): # Check forward 
+                    # Back to lane center
+                    if self.car_pos[0] > self.lanes[self.car_lane]:
+                        return ["SPEED", "MOVE_LEFT"]
+                    elif self.car_pos[0 ] < self.lanes[self.car_lane]:
+                        return ["SPEED", "MOVE_RIGHT"]
                     else :
-                        pred = 200 - (pred - 200*bound)
-                elif (bound < 0) : # pred < 0
-                    if (bound%2 ==1) :
-                        pred = abs(pred - (bound+1) *200)
-                    else :
-                        pred = pred + (abs(bound)*200)
+                        self.last=0
+                        return ["SPEED"]
+                else:
+                    if (5 in grid): # NEED to BRAKE
+                        '''if (4 not in grid) and (7 not in grid): # turn left 
+                            #if self.car_vel < speed_ahead:
+                            return ["SPEED", "MOVE_LEFT"]
+                            else:
+                                return ["BRAKE", "MOVE_LEFT"]
+                        elif (6 not in grid) and (9 not in grid): # turn right
+                            #if self.car_vel < speed_ahead:
+                            return ["SPEED", "MOVE_RIGHT"]
+                            else:
+                                return ["BRAKE", "MOVE_RIGHT"]'''
+                        if (1 not in grid) and (4 not in grid)and (self.last!=2): # turn left 
+                            self.last=1
+                            if car_ypos[5]<100:
+                                return ["NONE","MOVE_LEFT"]
+                            else:
+                                return ["SPEED", "MOVE_LEFT"]
+                        elif (3 not in grid) and (6 not in grid) and (self.last!=1): # turn right
+                            self.last=2
+                            if car_ypos[5]<100:
+                                return ["NONE","MOVE_RIGHT"]
+                            else:
+                                return ["SPEED", "MOVE_RIGHT"]
+                        if (1 in grid) and (4 not in grid) and (car_ypos[1]>car_ypos[5]):
+                            '''if (3 in grid) and (6 not in grid) and (car_ypos[3]>car_ypos[1]):
+                                return ["SPEED", "MOVE_RIGHT"]
+                            else:'''
+                            self.last=1
+                            return ["SPEED", "MOVE_LEFT"]
+                        elif (3 in grid) and (6 not in grid) and (car_ypos[3]>car_ypos[5]):
+                            self.last=2
+                            return ["SPEED", "MOVE_RIGHT"]
+                        elif (1 in grid) and (3 in grid) and (car_ypos[1]<=car_ypos[5])and (car_ypos[3]<=car_ypos[5]):
+                            return ["NONE"]
+                        if(4 in grid) and (6 in grid) : 
+                            if self.car_vel < speed_ahead:  # BRAKE
+                                return ["SPEED"]
+                            else:
+                                return ["NONE"]
+                    '''if (3 not in grid) and (6 in grid):
+                        if(car_id[6]<=4) and (car_id[6]!=0) :'''
 
-            return move_to(player = '1P',pred = pred,f=x)
-        else : # 球正在向上 # ball goes up
-            t=1
-            pred=100
-            f1=(scene_info["blocker"][1]-scene_info["ball"][1])//scene_info["ball_speed"][1]#球再f1個frame到板子
-            pt1=scene_info["ball"][0]+(scene_info["ball_speed"][0]*f1)#預測球到板子位置的x值
-            pt2=scene_info["ball"][1]+(scene_info["ball_speed"][1]*f1)#預測球到板子位置的y值
-            bound = pt1 // 200 # Determine if it is beyond the boundary
-            if (bound > 0): # pred > 200 # fix landing position
-                if (bound%2 == 0) : 
-                    pt1 = pt1 - bound*200                    
-                else :
-                    pt1 = 200 - (pt1 - 200*bound)
-            elif (bound < 0) : # pred < 0
-                if (bound%2 ==1) :
-                    pt1 = abs(pt1 - (bound+1) *200)
-                else :
-                    pt1 = pt1 + (abs(bound)*200)
-            print("pt1")        
-            print(pt1)
-            print(scene_info["blocker"][0]+block_direction*f1)
+                    if (self.car_pos[0] < 60 ):
+                        return ["SPEED", "MOVE_RIGHT"]
+                    if (1 not in grid) and (4 not in grid) and (7 not in grid): # turn left 
+                        return ["SPEED", "MOVE_LEFT"]
+                    if (3 not in grid) and (6 not in grid) and (9 not in grid): # turn right
+                        return ["SPEED", "MOVE_RIGHT"]
+                    if (1 not in grid) and (4 not in grid): # turn left 
+                        self.last=1
+                        return ["SPEED", "MOVE_LEFT"]
+                    if (3 not in grid) and (6 not in grid): # turn right
+                        self.last=2
+                        return ["SPEED", "MOVE_RIGHT"]
+                    if (4 not in grid) and (7 not in grid) and(car_ypos[1]>=100): # turn left 
+                        self.last=1
+                        return ["MOVE_LEFT","SPEED"]    
+                    if (6 not in grid) and (9 not in grid) and(car_ypos[3]>=100): # turn right
+                        self.last=2
+                        return ["MOVE_RIGHT","SPEED"]
+                                
+                    
+        if len(scene_info[self.player]) != 0:
+            self.car_pos = scene_info[self.player]
 
-            if(pt1<=scene_info["blocker"][0]+block_direction*f1+30 and pt1>=scene_info["blocker"][0]+block_direction*f1):
-                print("yes")
-                pred=pt1+(scene_info["ball_speed"][0]*f1)
-            return move_to(player = '1P',pred = pred,f=10)
+        for car in scene_info["cars_info"]:
+            if car["id"]==self.player_no:
+                self.car_vel = car["velocity"]
 
+        if scene_info["status"] != "ALIVE":
+            return "RESET"
+        self.car_lane = self.car_pos[0] // 70
+        return check_grid()
 
-
-
-    def ml_loop_for_2P():  # as same as 1P
-        if scene_info["ball_speed"][1] > 0 : 
-            return move_to(player = '2P',pred = 100,f=10)
-        else : 
-            x = ( scene_info["platform_2P"][1]+30-scene_info["ball"][1] ) // scene_info["ball_speed"][1] 
-            #print(x)
-            pred = scene_info["ball"][0]+(scene_info["ball_speed"][0]*x) 
-            bound = pred // 200 
-            if (bound > 0):
-                if (bound%2 == 0):
-                    pred = pred - bound*200 
-                else :
-                    pred = 200 - (pred - 200*bound)
-            elif (bound < 0) :
-                if bound%2 ==1:
-                    pred = abs(pred - (bound+1) *200)
-                else :
-                    pred = pred + (abs(bound)*200)
-            return move_to(player = '2P',pred = pred,f=x)
-
-    # 2. Inform the game process that ml process is ready
-    comm.ml_ready()
-
-    # 3. Start an endless loop
-    while True:
-        # 3.1. Receive the scene information sent from the game process
-        scene_info = comm.recv_from_game()
-
-        # 3.2. If either of two sides wins the game, do the updating or
-        #      resetting stuff and inform the game process when the ml process
-        #      is ready.
-        if scene_info["status"] != "GAME_ALIVE":
-            # Do some updating or resetting stuff
-            ball_served = False
-
-            # 3.2.1 Inform the game process that
-            #       the ml process is ready for the next round
-            comm.ml_ready()
-            continue
-
-        # 3.3 Put the code here to handle the scene information
-
-        # 3.4 Send the instruction for this frame to the game process
-        if not ball_served:
-            comm.send_to_game({"frame": scene_info["frame"], "command": "SERVE_TO_LEFT"})
-            ball_served = True
-        else:
-            if side == "1P":
-                block_direction=scene_info["blocker"][0]-block_pre
-                block_pre=scene_info["blocker"][0]
-                #print(block_direction)
-                command = ml_loop_for_1P(block_direction)
-            else:
-                command = ml_loop_for_2P()
-
-            if command == 0:
-                comm.send_to_game({"frame": scene_info["frame"], "command": "NONE"})
-            elif command == 1:
-                comm.send_to_game({"frame": scene_info["frame"], "command": "MOVE_RIGHT"})
-            else :
-                comm.send_to_game({"frame": scene_info["frame"], "command": "MOVE_LEFT"})
+    def reset(self):
+        """
+        Reset the status
+        """
+        pass
