@@ -118,7 +118,7 @@ class MLPlay:
                                 return ["BRAKE", "MOVE_RIGHT"]'''
                         if (1 not in grid) and (4 not in grid)and (self.last!=2): # turn left 
                             self.last=1
-                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead)and self.brake==0:
+                            if  speed_ahead!=0 and car_ypos[5]<(1500/speed_ahead)and self.brake==0:
                                 self.brake=1
                                 return ["BRAKE","MOVE_LEFT"]
                             elif speed_ahead!=0 and car_ypos[5]<(1600/speed_ahead):
@@ -129,7 +129,7 @@ class MLPlay:
                                 return ["SPEED", "MOVE_LEFT"]
                         elif (3 not in grid) and (6 not in grid) and (self.last!=1): # turn right
                             self.last=2
-                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead) and self.brake==0:
+                            if speed_ahead!=0 and car_ypos[5]<(1500/speed_ahead) and self.brake==0:
                                 self.brake=1
                                 return ["BRAKE","MOVE_RIGHT"]
                             elif speed_ahead!=0 and car_ypos[5]<(1600/speed_ahead):
@@ -143,7 +143,7 @@ class MLPlay:
                                 return ["SPEED", "MOVE_RIGHT"]
                             else:'''
                             self.last=1
-                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead) and self.brake==0:
+                            if speed_ahead!=0 and car_ypos[5]<(1500/speed_ahead) and self.brake==0:
                                 self.brake=1
                                 return ["BRAKE","MOVE_LEFT"]
                             elif speed_ahead!=0 and car_ypos[5]<(1600/speed_ahead):
@@ -154,7 +154,7 @@ class MLPlay:
                                 return ["SPEED", "MOVE_LEFT"]
                         elif (3 in grid) and (6 not in grid) and (car_ypos[3]>car_ypos[5]):
                             self.last=2
-                            if speed_ahead!=0 and car_ypos[5]<(1300/speed_ahead) and self.brake==0:
+                            if speed_ahead!=0 and car_ypos[5]<(1500/speed_ahead) and self.brake==0:
                                 self.brake=1
                                 return ["BRAKE","MOVE_RIGHT"]
                             elif speed_ahead!=0 and car_ypos[5]<(1600/speed_ahead):
@@ -164,7 +164,7 @@ class MLPlay:
                                 self.brake=0
                                 return ["SPEED", "MOVE_RIGHT"]
                         elif (1 in grid) and (3 in grid) and (car_ypos[1]<=car_ypos[5])and (car_ypos[3]<=car_ypos[5]):
-                            if car_ypos[5]<(1300/speed_ahead) and self.brake==0:
+                            if car_ypos[5]<(1500/speed_ahead) and self.brake==0:
                                 self.brake=1
                                 return ["BRAKE"]
                             else:
