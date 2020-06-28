@@ -97,7 +97,7 @@ class MLPlay:
             if self.player_no == 0:
                 print(grid)
             self.coin_new=[]
-            for coin in self.coins_pos:
+            '''for coin in self.coins_pos:
                 #print(coin[0])
                 count=0
                 if coin[1]<self.car_pos[1]+40:
@@ -105,27 +105,6 @@ class MLPlay:
                         self.coin_new.append(coin[0]-self.car_pos[0]+10)
                     else:
                         self.coin_new.append(coin[0]-self.car_pos[0]+10)
-                    '''if(coin[0]<self.car_pos[0]-25) and (coin[0]>self.car_pos[0]+25) and (5 not in grid) and (self.last==0):
-                        self.last=0
-                        return ["SPEED"]
-                    if (coin[0]<self.car_pos[0]-20) and (4 not in grid) and (self.last!=2):
-                        if(5 in grid) and speed_ahead!=0 and car_ypos[5]<(1500/speed_ahead)and self.brake==0:
-                           count+=1
-                        else:
-                            self.last=1
-                            self.brake=0
-                            #print("left")
-                            return ["SPEED", "MOVE_LEFT"]
-                    if (coin[0]>self.car_pos[0]+20) and (6 not in grid) and (self.last!=1):
-                        if(5 in grid) and speed_ahead!=0 and car_ypos[5]<(1500/speed_ahead)and self.brake==0:
-                            if count==1:
-                                print("break")
-                                break
-                        else:
-                            self.last=2
-                            self.brake=0
-                            #print("right")
-                            return ["SPEED", "MOVE_RIGHT"]'''
             self.coin_new=sorted(self.coin_new, key=abs)
             if(self.player_no==0):
                 print("sort")
@@ -168,7 +147,7 @@ class MLPlay:
                         self.last=2
                         self.brake=0
                         #print("right")
-                        return ["SPEED", "MOVE_RIGHT"]
+                        return ["SPEED", "MOVE_RIGHT"]'''
 
             if len(grid) == 0:
                 return ["SPEED"]
