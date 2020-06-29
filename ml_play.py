@@ -108,7 +108,7 @@ class MLPlay:
             self.coin_new=sorted(self.coin_new, key=abs)
             if(self.player_no==0):
                 print("sort")
-            for coin in self.coin_new:
+            '''for coin in self.coin_new:
                 count=0
                 if(self.player_no==0):
                     print(coin)
@@ -147,7 +147,7 @@ class MLPlay:
                         self.last=2
                         self.brake=0
                         #print("right")
-                        return ["SPEED", "MOVE_RIGHT"]
+                        return ["SPEED", "MOVE_RIGHT"]'''
 
             if len(grid) == 0:
                 return ["SPEED"]
