@@ -113,7 +113,7 @@ class MLPlay:
                 if(self.player_no==0):
                     print(coin)
                 if(abs(coin)<=15):
-                    if(5 in grid) and speed_ahead!=0 and car_ypos[5]<(1500/speed_ahead):
+                    if(5 in grid) and speed_ahead!=0 and car_ypos[5]<(1620/speed_ahead):
                        #self.last=0
                        if(self.player_no==0):
                             print("break")
@@ -122,7 +122,7 @@ class MLPlay:
                         self.last=0
                         return ["SPEED"]
                 elif (coin<-15):
-                    if(5 in grid) and speed_ahead!=0 and car_ypos[5]<(1500/speed_ahead):
+                    if(5 in grid) and speed_ahead!=0 and car_ypos[5]<(1620/speed_ahead):
                        #self.last=0
                        if(self.player_no==0):
                             print("break")
@@ -135,7 +135,7 @@ class MLPlay:
                         #print("left")
                         return ["SPEED", "MOVE_LEFT"]
                 elif (coin>15):
-                    if(5 in grid) and speed_ahead!=0 and car_ypos[5]<(1500/speed_ahead):
+                    if(5 in grid) and speed_ahead!=0 and car_ypos[5]<(1620/speed_ahead):
                         #self.last=0
                         if(self.player_no==0):
                             print("break")
