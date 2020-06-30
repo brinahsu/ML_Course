@@ -97,7 +97,7 @@ class MLPlay:
             if self.player_no == 0:
                 print(grid)
             self.coin_new=[]
-            '''for coin in self.coins_pos:
+            for coin in self.coins_pos:
                 #print(coin[0])
                 count=0
                 if coin[1]<self.car_pos[1]+40:
@@ -147,7 +147,7 @@ class MLPlay:
                         self.last=2
                         self.brake=0
                         #print("right")
-                        return ["SPEED", "MOVE_RIGHT"]'''
+                        return ["SPEED", "MOVE_RIGHT"]
 
             if len(grid) == 0:
                 return ["SPEED"]
